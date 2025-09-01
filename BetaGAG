@@ -128,7 +128,7 @@ end)
 
 local AutoPlantEnabled = false
 
--- Danh sách seed + vị trí trồng, ưu tiên Carrot
+-- Danh sách seed Tier 1 + vị trí trồng, ưu tiên Carrot
 local PlantList = {
     {Vector3.new(50.8209, 0.1355, -111.7352), "Carrot"},
     {Vector3.new(50.8209, 0.1355, -111.7352), "Strawberry"},
@@ -154,6 +154,7 @@ local function GetAllSeeds(baseName)
     return seeds
 end
 
+-- Hàm Auto Plant
 local function PlantSeeds()
     local plr = game.Players.LocalPlayer
     local RepStorage = game:GetService("ReplicatedStorage")
@@ -163,7 +164,6 @@ local function PlantSeeds()
         local pos = seedInfo[1]
         local baseName = seedInfo[2]
 
-        -- Lấy tất cả seed cùng loại còn trong Backpack
         local seeds = GetAllSeeds(baseName)
         if #seeds > 0 then
             -- Equip seed 1 lần, giữ 2 giây
@@ -173,7 +173,11 @@ local function PlantSeeds()
             -- Trồng tất cả seed cùng loại
             for _, tool in ipairs(seeds) do
                 if tool.Parent == plr.Character or tool.Parent == plr.Backpack then
-                    PlantEvent:FireServer(pos, tool.Name)
+                    local args = {
+                        [1] = pos,
+                        [2] = baseName
+                    }
+                    PlantEvent:FireServer(unpack(args))
                     task.wait(0.05) -- wait giữa mỗi lần plant
                 end
             end
