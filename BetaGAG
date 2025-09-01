@@ -126,10 +126,8 @@ AutoBuySeed.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Toggle Auto Plant
 local AutoPlantEnabled = false
 
--- Danh sách seed + vị trí trồng
 local PlantList = {
     {Vector3.new(50.8209, 0.1355, -111.7352), "Carrot"},
     {Vector3.new(50.8209, 0.1355, -111.7352), "Strawberry"},
@@ -143,38 +141,46 @@ local PlantList = {
     {Vector3.new(50.8209, 0.1355, -111.7352), "Apple"}
 }
 
--- Hàm equip seed và giữ 3 giây
-local function EquipSeed(baseName)
+-- Hàm lấy tất cả Tool cùng loại trong Backpack
+local function GetAllSeeds(baseName)
     local plr = game.Players.LocalPlayer
+    local seeds = {}
     for _, item in ipairs(plr.Backpack:GetChildren()) do
-        if string.find(item.Name, baseName) and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid:EquipTool(item)
-            task.wait(3) -- giữ seed 3 giây
-            return item.Name -- trả về tên Tool đã equip
+        if string.find(item.Name, baseName) then
+            table.insert(seeds, item)
         end
     end
-    return nil
+    return seeds
 end
 
--- Hàm Auto Plant: trồng 1 seed từng loại, equip 3s, plant wait 0.05
 local function PlantSeeds()
     local plr = game.Players.LocalPlayer
     local RepStorage = game:GetService("ReplicatedStorage")
     local PlantEvent = RepStorage:WaitForChild("GameEvents"):WaitForChild("Plant_RE")
 
-    for _, seed in ipairs(PlantList) do
-        local pos = seed[1]
-        local baseName = seed[2]
+    for _, seedInfo in ipairs(PlantList) do
+        local pos = seedInfo[1]
+        local baseName = seedInfo[2]
 
-        local toolName = EquipSeed(baseName)
-        if toolName then
-            PlantEvent:FireServer(pos, toolName)
-            task.wait(0.05) -- wait sau mỗi lần plant
+        -- Lấy tất cả seed cùng loại còn trong Backpack
+        local seeds = GetAllSeeds(baseName)
+        if #seeds > 0 then
+            -- Equip seed 1 lần, giữ 3 giây
+            plr.Character.Humanoid:EquipTool(seeds[1])
+            task.wait(3)
+
+            -- Trồng hết số lượng seed cùng loại
+            for _, tool in ipairs(seeds) do
+                if tool.Parent == plr.Character or tool.Parent == plr.Backpack then
+                    PlantEvent:FireServer(pos, tool.Name)
+                    task.wait(0.05)
+                end
+            end
         end
     end
 end
 
--- Kết nối nút AutoPlant
+-- Toggle AutoPlant
 AutoPlant.MouseButton1Click:Connect(function()
     AutoPlantEnabled = not AutoPlantEnabled
     AutoPlant.BackgroundColor3 = AutoPlantEnabled and Color3.fromRGB(0,200,0) or Color3.fromRGB(70,70,70)
@@ -182,7 +188,7 @@ AutoPlant.MouseButton1Click:Connect(function()
     spawn(function()
         while AutoPlantEnabled do
             PlantSeeds()
-            task.wait(1) -- delay giữa các vòng trồng
+            task.wait(1)
         end
     end)
 end)
