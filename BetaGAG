@@ -127,67 +127,21 @@ AutoBuySeed.MouseButton1Click:Connect(function()
 end)
 
 -- Toggle Auto Plant
-local AutoPlantEnabled = false
-
--- Danh sách seed + vị trí trồng
-local PlantList = {
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Carrot"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Strawberry"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Blueberry"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Orange Tulip"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Tomato"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Corn"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Daffodil"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Watermelon"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Pumpkin"},
-    {Vector3.new(50.8209, 0.1355, -111.7352), "Apple"}
-}
-
--- Hàm tìm và equip seed
-local function EquipSeed(baseName)
-    local plr = game.Players.LocalPlayer
-    for _, item in ipairs(plr.Backpack:GetChildren()) do
-        if string.find(item.Name, baseName) and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid:EquipTool(item)
-            wait(0.05)
-            return item -- trả về Tool đã equip
-        end
-    end
-    return nil
-end
-
--- Hàm Auto Plant: equip từng seed 1, trồng hết, rồi mới sang seed khác
-local function PlantSeeds()
-    local plr = game.Players.LocalPlayer
-    local RepStorage = game:GetService("ReplicatedStorage")
-    local PlantEvent = RepStorage:WaitForChild("GameEvents"):WaitForChild("Plant_RE")
-
-    for _, seed in ipairs(PlantList) do
-        local pos = seed[1]
-        local baseName = seed[2]
-
-        -- Tìm seed còn trong Backpack
-        local tool = EquipSeed(baseName)
-        while tool and tool.Parent == plr.Character do
-            -- Fire Plant_RE cho seed hiện tại
+local AutoPla1) do
             PlantEvent:FireServer(pos, tool.Name)
-            wait(0.2) -- delay nhỏ
+            wait(0.2) -- delay giữa các lần trồng
 
-            -- Nếu còn seed khác cùng loại trong Backpack, equip lại
-            if #plr.Backpack:GetChildren() > 0 then
-                local nextTool
-                for _, item in ipairs(plr.Backpack:GetChildren()) do
-                    if string.find(item.Name, baseName) then
-                        plr.Character.Humanoid:EquipTool(item)
-                        wait(0.05)
-                        nextTool = item
-                        break
-                    end
+            -- Kiểm tra còn seed cùng loại trong Backpack
+            local nextTool
+            for _, item in ipairs(plr.Backpack:GetChildren()) do
+                if string.find(item.Name, baseName) then
+                    plr.Character.Humanoid:EquipTool(item)
+                    wait(0.5)
+                    nextTool = item
+                    break
                 end
-                tool = nextTool
-            else
-                tool = nil
             end
+            tool = nextTool
         end
     end
 end
@@ -204,6 +158,7 @@ AutoPlant.MouseButton1Click:Connect(function()
         end
     end)
 end)
+
 --== [ Auto Sell ] ==
 local AutoSellEnabled = false
 local function SellCrops()
