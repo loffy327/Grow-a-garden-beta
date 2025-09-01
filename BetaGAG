@@ -151,11 +151,17 @@ local function PlantSeeds()
     for _, seed in ipairs(PlantList) do
         local seedName = seed[2]
 
-        -- Equip seed nếu có trong backpack
-        local backpackSeed = plr.Backpack:FindFirstChild(seedName)
-        if backpackSeed then
-            backpackSeed.Parent = plr.Character -- equip seed
-        end
+        local function EquipSeed(seedName)
+    local plr = game.Players.LocalPlayer
+    local tool = plr.Backpack:FindFirstChild(seedName)
+    if tool and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+        plr.Character.Humanoid:EquipTool(tool) -- equip seed đúng cách
+        wait(0.1) -- delay nhỏ để chắc chắn tool đã equip
+        return true
+    end
+    return false
+end
+
 
         local args = {
             [1] = seed[1],
