@@ -150,13 +150,13 @@ local function EquipSeed(baseName)
         if string.find(item.Name, baseName) and plr.Character and plr.Character:FindFirstChild("Humanoid") then
             plr.Character.Humanoid:EquipTool(item)
             wait(0.05)
-            return item.Name -- trả về tên Tool đã equip
+            return item -- trả về Tool đã equip
         end
     end
     return nil
 end
 
--- Hàm Auto Plant
+-- Hàm Auto Plant: equip từng seed 1, trồng hết, rồi mới sang seed khác
 local function PlantSeeds()
     local plr = game.Players.LocalPlayer
     local RepStorage = game:GetService("ReplicatedStorage")
@@ -166,10 +166,28 @@ local function PlantSeeds()
         local pos = seed[1]
         local baseName = seed[2]
 
-        local toolName = EquipSeed(baseName)
-        if toolName then
-            PlantEvent:FireServer(pos, toolName)
-            wait(0.2) -- tránh spam quá nhanh
+        -- Tìm seed còn trong Backpack
+        local tool = EquipSeed(baseName)
+        while tool and tool.Parent == plr.Character do
+            -- Fire Plant_RE cho seed hiện tại
+            PlantEvent:FireServer(pos, tool.Name)
+            wait(0.2) -- delay nhỏ
+
+            -- Nếu còn seed khác cùng loại trong Backpack, equip lại
+            if #plr.Backpack:GetChildren() > 0 then
+                local nextTool
+                for _, item in ipairs(plr.Backpack:GetChildren()) do
+                    if string.find(item.Name, baseName) then
+                        plr.Character.Humanoid:EquipTool(item)
+                        wait(0.05)
+                        nextTool = item
+                        break
+                    end
+                end
+                tool = nextTool
+            else
+                tool = nil
+            end
         end
     end
 end
@@ -182,11 +200,10 @@ AutoPlant.MouseButton1Click:Connect(function()
     spawn(function()
         while AutoPlantEnabled do
             PlantSeeds()
-            wait(1) -- delay giữa các vòng trồng
+            wait(1)
         end
     end)
 end)
-
 --== [ Auto Sell ] ==
 local AutoSellEnabled = false
 local function SellCrops()
