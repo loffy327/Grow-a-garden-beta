@@ -143,20 +143,20 @@ local PlantList = {
     {Vector3.new(50.8209, 0.1355, -111.7352), "Apple"}
 }
 
--- Hàm tìm và equip seed
+-- Hàm equip seed và giữ 3 giây
 local function EquipSeed(baseName)
     local plr = game.Players.LocalPlayer
     for _, item in ipairs(plr.Backpack:GetChildren()) do
         if string.find(item.Name, baseName) and plr.Character and plr.Character:FindFirstChild("Humanoid") then
             plr.Character.Humanoid:EquipTool(item)
-            task.wait(0.05) -- delay nhỏ để chắc chắn equip
-            return item -- trả về Tool đã equip
+            task.wait(3) -- giữ seed 3 giây
+            return item.Name -- trả về tên Tool đã equip
         end
     end
     return nil
 end
 
--- Hàm Auto Plant: equip từng seed 1, trồng hết, rồi mới sang seed khác
+-- Hàm Auto Plant: trồng 1 seed từng loại, equip 3s, plant wait 0.05
 local function PlantSeeds()
     local plr = game.Players.LocalPlayer
     local RepStorage = game:GetService("ReplicatedStorage")
@@ -166,24 +166,10 @@ local function PlantSeeds()
         local pos = seed[1]
         local baseName = seed[2]
 
-        -- Tìm seed còn trong Backpack
-        local tool = EquipSeed(baseName)
-        while tool and tool.Parent == plr.Character do
-            -- Fire Plant_RE cho seed hiện tại
-            PlantEvent:FireServer(pos, tool.Name)
-            task.wait(0.05) -- delay giữa mỗi hành động plant
-
-            -- Nếu còn seed khác cùng loại trong Backpack, equip lại
-            local nextTool
-            for _, item in ipairs(plr.Backpack:GetChildren()) do
-                if string.find(item.Name, baseName) then
-                    plr.Character.Humanoid:EquipTool(item)
-                    task.wait(0.05)
-                    nextTool = item
-                    break
-                end
-            end
-            tool = nextTool
+        local toolName = EquipSeed(baseName)
+        if toolName then
+            PlantEvent:FireServer(pos, toolName)
+            task.wait(0.05) -- wait sau mỗi lần plant
         end
     end
 end
@@ -196,7 +182,7 @@ AutoPlant.MouseButton1Click:Connect(function()
     spawn(function()
         while AutoPlantEnabled do
             PlantSeeds()
-            task.wait(0.05) -- delay giữa mỗi vòng
+            task.wait(1) -- delay giữa các vòng trồng
         end
     end)
 end)
