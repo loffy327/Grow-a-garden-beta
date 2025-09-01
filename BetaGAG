@@ -121,7 +121,7 @@ AutoBuySeed.MouseButton1Click:Connect(function()
         while AutoBuySeedEnabled do
             TeleportTo(BuySeedPosition)
             BuySeeds()
-            wait(1)
+            wait(0.008008)
         end
     end)
 end)
