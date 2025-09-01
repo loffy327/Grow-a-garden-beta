@@ -110,7 +110,7 @@ local function BuySeeds()
     local BuyEvent = RepStorage:WaitForChild("GameEvents"):WaitForChild("BuySeedStock")
     for _, seed in ipairs(SeedList) do
         BuyEvent:FireServer(unpack(seed))
-        wait(0.2)
+        wait(0.005)
     end
 end
 
@@ -178,7 +178,7 @@ local function PlantSeeds()
                         [2] = baseName
                     }
                     PlantEvent:FireServer(unpack(args))
-                    task.wait(0.05) -- wait giữa mỗi lần plant
+                    task.wait(0.005) -- wait giữa mỗi lần plant
                 end
             end
         end
@@ -193,7 +193,7 @@ AutoPlant.MouseButton1Click:Connect(function()
     spawn(function()
         while AutoPlantEnabled do
             PlantSeeds()
-            task.wait(1) -- delay giữa các vòng
+            task.wait(0.01) -- delay giữa các vòng
         end
     end)
 end)
