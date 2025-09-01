@@ -126,8 +126,10 @@ AutoBuySeed.MouseButton1Click:Connect(function()
     end)
 end)
 
---== [ Auto Plant ] ==
+--== Auto Plant with Equip ==--
 local AutoPlantEnabled = false
+
+-- Seed list với vị trí trồng
 local PlantList = {
     {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Carrot"},
     {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Strawberry"},
@@ -142,18 +144,33 @@ local PlantList = {
 }
 
 local function PlantSeeds()
+    local plr = game.Players.LocalPlayer
     local RepStorage = game:GetService("ReplicatedStorage")
     local PlantEvent = RepStorage:WaitForChild("GameEvents"):WaitForChild("Plant_RE")
+
     for _, seed in ipairs(PlantList) do
-        local args = {[1]=seed[1],[2]=seed[2]}
+        local seedName = seed[2]
+
+        -- Equip seed nếu có trong backpack
+        local backpackSeed = plr.Backpack:FindFirstChild(seedName)
+        if backpackSeed then
+            backpackSeed.Parent = plr.Character -- equip seed
+        end
+
+        local args = {
+            [1] = seed[1],
+            [2] = seedName
+        }
         PlantEvent:FireServer(unpack(args))
-        wait(0.2)
+        wait(0.2) -- delay tránh spam
     end
 end
 
+-- Kết nối nút AutoPlant
 AutoPlant.MouseButton1Click:Connect(function()
     AutoPlantEnabled = not AutoPlantEnabled
     AutoPlant.BackgroundColor3 = AutoPlantEnabled and Color3.fromRGB(0,200,0) or Color3.fromRGB(70,70,70)
+
     spawn(function()
         while AutoPlantEnabled do
             PlantSeeds()
