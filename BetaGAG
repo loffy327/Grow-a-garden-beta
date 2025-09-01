@@ -1,0 +1,192 @@
+--== [ L Menu Roblox Complete ] ==--
+
+-- CoreGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "LMenu"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Frame chính (Menu chữ L)
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 300, 0, 40)
+MainFrame.Position = UDim2.new(0, 20, 0, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MainFrame.BackgroundTransparency = 0.7
+MainFrame.Parent = ScreenGui
+
+-- Button mở menu
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(1, 0, 1, 0)
+ToggleButton.BackgroundTransparency = 1
+ToggleButton.Text = "L Menu"
+ToggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.TextScaled = true
+ToggleButton.Parent = MainFrame
+
+-- Frame nội dung menu
+local MenuFrame = Instance.new("Frame")
+MenuFrame.Size = UDim2.new(0, 300, 0, 200)
+MenuFrame.Position = UDim2.new(0,0,0,40)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MenuFrame.BackgroundTransparency = 0.8
+MenuFrame.Visible = false
+MenuFrame.Parent = MainFrame
+
+-- Tab Buttons
+local MainTab = Instance.new("TextButton")
+MainTab.Size = UDim2.new(0.5,0,0,30)
+MainTab.Position = UDim2.new(0,0,0,0)
+MainTab.BackgroundColor3 = Color3.fromRGB(50,50,50)
+MainTab.Text = "Main"
+MainTab.TextColor3 = Color3.fromRGB(255,255,255)
+MainTab.Parent = MenuFrame
+
+local MisceTab = Instance.new("TextButton")
+MisceTab.Size = UDim2.new(0.5,0,0,30)
+MisceTab.Position = UDim2.new(0.5,0,0,0)
+MisceTab.BackgroundColor3 = Color3.fromRGB(50,50,50)
+MisceTab.Text = "Misce"
+MisceTab.TextColor3 = Color3.fromRGB(255,255,255)
+MisceTab.Parent = MenuFrame
+
+-- Frame nội dung Main
+local MainContent = Instance.new("Frame")
+MainContent.Size = UDim2.new(1,0,1,-30)
+MainContent.Position = UDim2.new(0,0,0,30)
+MainContent.BackgroundTransparency = 1
+MainContent.Parent = MenuFrame
+
+--=== [ Hàm tạo nút Main ] ===--
+local function createButton(name, posY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9,0,0,40)
+    btn.Position = UDim2.new(0.05,0,0,posY)
+    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Text = name
+    btn.Parent = MainContent
+    return btn
+end
+
+local AutoBuySeed = createButton("Auto Buy Seed", 10)
+local AutoPlant = createButton("Auto Plant", 60)
+local AutoSell = createButton("Auto Sell", 110)
+
+--== [ Toggle Menu ] ==
+ToggleButton.MouseButton1Click:Connect(function()
+    MenuFrame.Visible = not MenuFrame.Visible
+end)
+
+--== [ Tab Main/Misce ] ==
+MainTab.MouseButton1Click:Connect(function()
+    MainContent.Visible = true
+end)
+
+MisceTab.MouseButton1Click:Connect(function()
+    MainContent.Visible = false
+end)
+
+--== [ Auto Buy Seed ] ==
+local AutoBuySeedEnabled = false
+local BuySeedPosition = Vector3.new(69.12620544433594, 4.443000793457031, -27.03352165222168)
+local SeedList = {
+    {"Tier 1", "Carrot"},{"Tier 1", "Strawberry"},{"Tier 1", "Blueberry"},
+    {"Tier 1", "Orange Tulip"},{"Tier 1", "Tomato"},{"Tier 1", "Corn"},
+    {"Tier 1", "Daffodil"},{"Tier 1", "Watermelon"},{"Tier 1", "Pumpkin"},
+    {"Tier 1", "Apple"}
+}
+
+local function TeleportTo(pos)
+    local plr = game.Players.LocalPlayer
+    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        plr.Character.HumanoidRootPart.CFrame = CFrame.new(pos)
+    end
+end
+
+local function BuySeeds()
+    local RepStorage = game:GetService("ReplicatedStorage")
+    local BuyEvent = RepStorage:WaitForChild("GameEvents"):WaitForChild("BuySeedStock")
+    for _, seed in ipairs(SeedList) do
+        BuyEvent:FireServer(unpack(seed))
+        wait(0.2)
+    end
+end
+
+AutoBuySeed.MouseButton1Click:Connect(function()
+    AutoBuySeedEnabled = not AutoBuySeedEnabled
+    AutoBuySeed.BackgroundColor3 = AutoBuySeedEnabled and Color3.fromRGB(0,200,0) or Color3.fromRGB(70,70,70)
+    spawn(function()
+        while AutoBuySeedEnabled do
+            TeleportTo(BuySeedPosition)
+            BuySeeds()
+            wait(1)
+        end
+    end)
+end)
+
+--== [ Auto Plant ] ==
+local AutoPlantEnabled = false
+local PlantList = {
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Carrot"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Strawberry"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Blueberry"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Orange Tulip"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Tomato"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Corn"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Daffodil"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Watermelon"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Pumpkin"},
+    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Apple"}
+}
+
+local function PlantSeeds()
+    local RepStorage = game:GetService("ReplicatedStorage")
+    local PlantEvent = RepStorage:WaitForChild("GameEvents"):WaitForChild("Plant_RE")
+    for _, seed in ipairs(PlantList) do
+        local args = {[1]=seed[1],[2]=seed[2]}
+        PlantEvent:FireServer(unpack(args))
+        wait(0.2)
+    end
+end
+
+AutoPlant.MouseButton1Click:Connect(function()
+    AutoPlantEnabled = not AutoPlantEnabled
+    AutoPlant.BackgroundColor3 = AutoPlantEnabled and Color3.fromRGB(0,200,0) or Color3.fromRGB(70,70,70)
+    spawn(function()
+        while AutoPlantEnabled do
+            PlantSeeds()
+            wait(1)
+        end
+    end)
+end)
+
+--== [ Auto Sell ] ==
+local AutoSellEnabled = false
+local function SellCrops()
+    local plr = game.Players.LocalPlayer
+    if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    local SellPosition = Vector3.new(75,4,-25)
+    plr.Character.HumanoidRootPart.CFrame = CFrame.new(SellPosition)
+
+    local RepStorage = game:GetService("ReplicatedStorage")
+    local SellEvent = RepStorage:WaitForChild("GameEvents"):WaitForChild("SellCrop")
+
+    for _, crop in ipairs(plr.Backpack:GetChildren()) do
+        SellEvent:FireServer(crop.Name)
+        wait(0.2)
+    end
+end
+
+AutoSell.MouseButton1Click:Connect(function()
+    AutoSellEnabled = not AutoSellEnabled
+    AutoSell.BackgroundColor3 = AutoSellEnabled and Color3.fromRGB(0,200,0) or Color3.fromRGB(70,70,70)
+    spawn(function()
+        while AutoSellEnabled do
+            SellCrops()
+            wait(1)
+        end
+    end)
+end)
