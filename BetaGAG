@@ -126,49 +126,51 @@ AutoBuySeed.MouseButton1Click:Connect(function()
     end)
 end)
 
---== Auto Plant with Equip ==--
+-- Toggle Auto Plant
 local AutoPlantEnabled = false
 
--- Seed list với vị trí trồng
+-- Danh sách seed + vị trí trồng
 local PlantList = {
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Carrot"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Strawberry"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Blueberry"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Orange Tulip"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Tomato"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Corn"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Daffodil"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Watermelon"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Pumpkin"},
-    {Vector3.new(50.8209342956543, 0.13552704453468323, -111.73527526855469), "Apple"}
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Carrot"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Strawberry"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Blueberry"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Orange Tulip"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Tomato"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Corn"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Daffodil"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Watermelon"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Pumpkin"},
+    {Vector3.new(50.8209, 0.1355, -111.7352), "Apple"}
 }
 
+-- Hàm tìm và equip seed
+local function EquipSeed(baseName)
+    local plr = game.Players.LocalPlayer
+    for _, item in ipairs(plr.Backpack:GetChildren()) do
+        if string.find(item.Name, baseName) and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character.Humanoid:EquipTool(item)
+            wait(0.05)
+            return item.Name -- trả về tên Tool đã equip
+        end
+    end
+    return nil
+end
+
+-- Hàm Auto Plant
 local function PlantSeeds()
     local plr = game.Players.LocalPlayer
     local RepStorage = game:GetService("ReplicatedStorage")
     local PlantEvent = RepStorage:WaitForChild("GameEvents"):WaitForChild("Plant_RE")
 
     for _, seed in ipairs(PlantList) do
-        local seedName = seed[2]
+        local pos = seed[1]
+        local baseName = seed[2]
 
-        local function EquipSeed(seedName)
-    local plr = game.Players.LocalPlayer
-    local tool = plr.Backpack:FindFirstChild(seedName)
-    if tool and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-        plr.Character.Humanoid:EquipTool(tool) -- equip seed đúng cách
-        wait(0.1) -- delay nhỏ để chắc chắn tool đã equip
-        return true
-    end
-    return false
-end
-
-
-        local args = {
-            [1] = seed[1],
-            [2] = seedName
-        }
-        PlantEvent:FireServer(unpack(args))
-        wait(0.2) -- delay tránh spam
+        local toolName = EquipSeed(baseName)
+        if toolName then
+            PlantEvent:FireServer(pos, toolName)
+            wait(0.2) -- tránh spam quá nhanh
+        end
     end
 end
 
@@ -180,7 +182,7 @@ AutoPlant.MouseButton1Click:Connect(function()
     spawn(function()
         while AutoPlantEnabled do
             PlantSeeds()
-            wait(1)
+            wait(1) -- delay giữa các vòng trồng
         end
     end)
 end)
